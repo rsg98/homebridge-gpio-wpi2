@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+
+console.log("Rebuild the set-gpio.sh script using your Homebridge config.json\n\n");
+
+if (process.argv.length < 4) {
+    console.log("Usage: ./make-gpio-script input-config.json set-gpio.sh");
+}
+
+process.exit();

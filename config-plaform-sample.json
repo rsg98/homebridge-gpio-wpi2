@@ -1,0 +1,58 @@
+{
+        "platforms": [
+        {
+            "platform" : "WiringPiPlatform",
+            "name" : "Pi GPIO (WiringPi)",
+            "overrideCache" : "false",
+	        "gpiopins" : [{
+		        "name" : "GPIO2",
+		        "pin"  : 27,
+                "enabled" : "true",
+		        "mode" : "out",
+                "pull" : "down",
+		        "inverted" : "false",
+                "duration" : 0
+	        },{
+		        "name" : "GPIO3",
+		        "pin"  : 22,
+                "enabled" : "true",
+		        "mode" : "out",
+                "pull" : "down",
+		        "inverted" : "false",
+                "duration" : 0
+            },{
+		        "name" : "GPIO4",
+		        "pin"  : 23,
+                "enabled" : "true",
+		        "mode" : "out",
+                "pull" : "down",
+		        "inverted" : "false",
+                "duration" : 0
+            },{
+		        "name" : "GPIO5",
+		        "pin"  : 24,
+                "enabled" : "true",
+		        "mode" : "out",
+                "pull" : "down",
+		        "inverted" : "false",
+                "duration" : 0
+            },{
+		        "name" : "GPIO6",
+		        "pin"  : 25,
+                "enabled" : "true",
+		        "mode" : "out",
+                "pull" : "down",
+		        "inverted" : "false",
+                "duration" : 0
+            },{
+		        "name" : "GPIO7",
+		        "pin"  : 4,
+                "enabled" : "true",
+		        "mode" : "out",
+                "pull" : "down",
+		        "inverted" : "false",
+                "duration" : 0
+	        }]
+        }
+    ]
+}
