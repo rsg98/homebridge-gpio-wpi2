@@ -1,9 +1,71 @@
 #!/usr/bin/env node
 
-console.log("Rebuild the set-gpio.sh script using your Homebridge config.json\n\n");
+const fs = require('fs');
+const path = require('path');
+const util = require('util');
+
+const OUTPUT_NAME = "set-gpio.sh";
+
+var config = [];
+
+console.log("\nRebuild the set-gpio.sh script using your Homebridge config.json\n");
 
 if (process.argv.length < 4) {
-    console.log("Usage: ./make-gpio-script input-config.json set-gpio.sh");
+    console.log("Usage: ./make-gpio-script input-config.json set-gpio.sh\n\n");
+    process.exit();
+} else {
+    try {
+        console.log("INFO:  Parsing %s", process.argv[2]);
+        config = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+    }
+    catch (err) {
+        console.log("ERROR: Cannot parse your config file (" + process.argv[2] + ")\nCheck it exists and is valid!", err);
+        process.exit();    
+    }
+    try {
+        //Force the output file to be named set-gpio.sh
+        var inputPath = path.parse(process.argv[3]);
+        if (inputPath.name + inputPath.ext != OUTPUT_NAME) {
+            console.log("ERROR: Output file is not called %s - aborting", OUTPUT_NAME);
+            process.exit();
+        } else {
+            console.log("INFO:  Truncating %s script", OUTPUT_NAME);
+            if ( fs.existsSync(process.argv[3])) {
+                fs.truncateSync(process.argv[3],0);
+            }
+            var scriptContents = configToScript(config);
+            console.log("INFO:  Writing to %s", OUTPUT_NAME);
+            fs.writeFileSync(process.argv[3], scriptContents);
+        }
+    }
+    catch (err) {
+        console.log("ERROR: Cannot write out to " + process.argv[3], err);
+        process.exit();
+    }
 }
 
 process.exit();
+
+function configToScript(inputConfig)
+{
+    var piPlatform = inputConfig.platforms.filter(function (el) { return el.platform == "WiringPiPlatform"});
+    var gpioPins = piPlatform[0].gpiopins;
+
+    script  = "#!/bin/sh\n\n";
+    script += "####\n";
+    script += "# Do not edit this script - it is generated automatically by make-gpio-script\n";
+    script += "####\n\n";
+    script += "GPIO=/usr/local/bin/gpio\n\n";
+
+    for (var i = 0, len = gpioPins.length; i < len; i++)
+    {
+        if (gpioPins[i].enabled.toUpperCase() == "TRUE") {
+            script += util.format("## %s\n", gpioPins[i].name)
+            script += util.format("$GPIO -g mode %s %s\n", gpioPins[i].pin, gpioPins[i].mode);
+            script += util.format("$GPIO -g mode %s %s\n", gpioPins[i].pin, gpioPins[i].pull);
+            script += util.format("$GPIO -g export %s %s\n\n", gpioPins[i].pin, gpioPins[i].mode);
+        }  
+    }
+
+    return script;
+}
