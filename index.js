@@ -1,4 +1,4 @@
-//var wpi = require('wiring-pi-rsg98');
+//var wpi = require('node-wiring-pi');
 var gpioExports = require('./readExports')();
 
 var Accessory, Service, Characteristic, UUIDGen;
@@ -18,7 +18,7 @@ module.exports = function(homebridge) {
 
 // Platform constructor
 function WPiPlatform(log, config, api) {
-  log("WiringPi Platform Init");
+  log("WORK IN PROGRESS... I DON'T WORK YET!");
   var platform = this;
   this.log = log;
   this.config = config;
@@ -40,6 +40,9 @@ function WPiPlatform(log, config, api) {
       this.api.on('didFinishLaunching', function() {
         platform.log("Loading cached GPIO pins complete");
         for ( var i in this.gpiopins ) { this.addGPIOPin(this.gpiopins[i]); }
+        
+        //Start polling all pins...
+        this.statePolling();
       }.bind(this));
   }
 }
@@ -48,26 +51,33 @@ function WPiPlatform(log, config, api) {
 WPiPlatform.prototype.configureAccessory = function(accessory) {
   this.log(accessory.displayName, "Configure GPIO Pin", accessory.UUID);
   var platform = this;
-
-  // set the accessory to reachable if plugin can currently process the accessory
-  // otherwise set to false and update the reachability later by invoking
-  // accessory.updateReachability()
   accessory.reachable = true;
 
+  if(platform.config.overrideCache === "true") {
+    var newContext = platform.gpiopins.find( p => p.name === accessory.context.name );
+    accessory.context = newContext;
+  }
+
+  if (accessory.getService(Service.Switch) && accessory.context.direction === "out") {
+    accessory.getService(Service.Switch)
+      .getCharacteristic(Characteristic.On)
+      .on('get', this.getOn.bind(this))
+      .on('set', this.setOn.bind(this));
+  }
+
+  if (accessory.getService(Service.ContactSensor) && accessory.context.direction === "in") {
+    accessory.getService(Service.ContactSensor)
+      .getCharacteristic(Characteristic.ContactSensorState)
+      .on('get', this.getOn.bind(this));
+  }
+
   // Handle the 'identify' event
-  // TODO: run 3000ms on/off?
   accessory.on('identify', function(paired, callback) {
     platform.log(accessory.displayName, "Identify!!!");
+    // TODO: run 3000ms on/off?
     callback();
   });
 
-  //Wire up switch events (get / set) for Service.Switch
-  if (accessory.getService(Service.Switch)) {
-    accessory.getService(Service.Switch)
-    .getCharacteristic(Characteristic.On)
-    .on('get', this.getOn.bind(this))
-    .on('set', this.setOn.bind(this));
-  }
 
   this.accessories.push(accessory);
 }
@@ -99,8 +109,17 @@ WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
       .setCharacteristic(Characteristic.Model, platform.config.model ? platform.config.model : "Pi GPIO")
       .setCharacteristic(Characteristic.SerialNumber, platform.config.serial ? platform.config.serial : "Default-SerialNumber");
 
-    newAccessory.addService(Service.Switch, gpiopin.name);
-
+    switch(gpiopin.mode) {
+      case "out":
+        newAccessory.addService(Service.Switch, gpiopin.name);
+        break;
+      case "in":
+        newAccessory.addService(Service.ContactSensor, gpiopin.name);
+        break;
+      default:
+        platform.log("WARNING: Unsupported GPIO Pin Mode (%s)", gpiopin.mode);
+    }
+    
     newAccessory.context = gpiopin;
         
     this.configureAccessory(newAccessory);
@@ -132,88 +151,44 @@ WPiPlatform.prototype.updateAccessoriesReachability = function() {
 }
 
 // Sample function to show how developer can remove accessory dynamically from outside event
-WPiPlatform.prototype.removeAccessory = function() {
+WPiPlatform.prototype.removeAccessory = function(accessory) {
   this.log("Remove Accessory");
   this.api.unregisterPlatformAccessories("homebridge-WPiPlatform", "WPiPlatform", this.accessories);
 
   this.accessories = [];
 }
 
-function GPIOAccessory(log, config) {
-    this.log = log;
-    this.name = config['name'];
-    this.pin = config['pin'];
-    this.duration = config['duration'];
 
-    //Config option to invert behaviour of GPIO output - i.e. 0 = On, 1 = Off.
-    this.inverted = ( config['inverted'] === "true" );
+// Method for state periodic update
+WPiPlatform.prototype.statePolling = function () {
+  var platform = this;
+  
+  // Clear polling
+  //clearTimeout(this.tout);
 
-    this.service = new Service.Switch(this.name);
-    this.informationService = new Service.AccessoryInformation();
+  console.log("Polling...");
+  // Setup periodic update with polling interval
+  this.tout = setTimeout(function () {
+        // Update states for all HomeKit accessories
+        for (var deviceID in platform.accessories) {
+          var accessory = platform.accessories[deviceID];
+          var gpioState = platform.prototype.getOn();
+          if (accessory.getService(Service.Switch) && accessory.context.direction === "out") {
+            accessory.getService(Service.Switch)
+              .getCharacteristic(Characteristic.On)
+              .setValue(gpioState);
+          }
 
-    if (!this.pin) throw new Error('You must provide a config value for pin.');
-
-    //Use pin numbering based on /sys/class/gpio exports (non-root)
-    wpi.setup('sys');
-
-    this.informationService
-      .setCharacteristic(Characteristic.Manufacturer, cpu['Hardware'])
-      .setCharacteristic(Characteristic.Model, cpu['Revision'])
-      .setCharacteristic(Characteristic.SerialNumber, cpu['Serial'])
-
-    this.service
-        .getCharacteristic(Characteristic.On)
-        .on('get', this.getOn.bind(this))
-        .on('set', this.setOn.bind(this));
-
-}
-
-GPIOAccessory.prototype.getServices = function() {
-    return [this.informationService, this.service];
-}
-
-GPIOAccessory.prototype.getOn = function(callback) {
-    // inverted XOR pin_value
-    var on = ( this.inverted != wpi.digitalRead(this.pin) );
-    callback(null, on);
-}
-
-GPIOAccessory.prototype.setOn = function(on, callback) {
-    // Handle inverted configurations by evaluating the
-    //  inverse of the inverted config bool, multipled by 1 to
-    //  give a 1 or 0 result for pinAction
-    if (on) {
-        this.pinAction(!this.inverted * 1);
-        if (is_defined(this.duration) && is_int(this.duration)) {
-            this.pinTimer()
+          if (accessory.getService(Service.ContactSensor) && accessory.context.direction === "in") {
+            accessory.getService(Service.ContactSensor)
+              .getCharacteristic(Characteristic.ContactSensorState)
+              .SetValue(gpioState);
+          }
         }
-        callback(null);
-    } else {
-        this.pinAction(this.inverted * 1);
-        callback(null);
-    }
+      
+      // Setup next polling
+      self.statePolling();
+  }, 2000);
 }
 
-GPIOAccessory.prototype.pinAction = function(action) {
-    this.log('Turning ' + (action == (!this.inverted * 1) ? 'on' : 'off') + ' pin #' + this.pin);
 
-    var self = this;
-    wpi.digitalWrite(self.pin, action);
-    var success = (wpi.digitalRead(self.pin) == action);
-    return success;
-}
-
-GPIOAccessory.prototype.pinTimer = function() {
-    var self = this;
-    setTimeout(function() {
-        self.pinAction(this.inverted * 1);
-    }, this.duration);
-}
-
-var is_int = function(n) {
-    return n % 1 === 0;
-}
-
-var is_defined = function(v) {
-    return typeof v !== 'undefined';
-}
