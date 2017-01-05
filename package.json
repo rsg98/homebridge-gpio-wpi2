@@ -15,6 +15,6 @@
 		"homebridge": ">=0.4.6"
 	},
 	"dependencies": {
-		"wiring-pi": "^2.2.0"
+		"node-wiring-pi": "^0.0.1"
 	}
 }
