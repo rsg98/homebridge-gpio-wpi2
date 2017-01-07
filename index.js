@@ -58,14 +58,14 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
     accessory.context = newContext;
   }
 
-  if (accessory.getService(Service.Switch) && accessory.context.direction === "out") {
+  if (accessory.getService(Service.Switch) && accessory.context.mode === "out") {
     accessory.getService(Service.Switch)
       .getCharacteristic(Characteristic.On)
       .on('get', this.getOn.bind(this))
       .on('set', this.setOn.bind(this));
   }
 
-  if (accessory.getService(Service.ContactSensor) && accessory.context.direction === "in") {
+  if (accessory.getService(Service.ContactSensor) && accessory.context.mode === "in") {
     accessory.getService(Service.ContactSensor)
       .getCharacteristic(Characteristic.ContactSensorState)
       .on('get', this.getOn.bind(this));
@@ -172,22 +172,20 @@ WPiPlatform.prototype.statePolling = function () {
         // Update states for all HomeKit accessories
         for (var deviceID in platform.accessories) {
           var accessory = platform.accessories[deviceID];
-          var gpioState = platform.prototype.getOn();
-          if (accessory.getService(Service.Switch) && accessory.context.direction === "out") {
-            accessory.getService(Service.Switch)
-              .getCharacteristic(Characteristic.On)
-              .setValue(gpioState);
-          }
+          if(accessory.context.polling === "true") {
+            if (accessory.getService(Service.Switch) && accessory.context.mode === "out") {
+              accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).getValue();
+            }
 
-          if (accessory.getService(Service.ContactSensor) && accessory.context.direction === "in") {
-            accessory.getService(Service.ContactSensor)
-              .getCharacteristic(Characteristic.ContactSensorState)
-              .SetValue(gpioState);
+            if (accessory.getService(Service.ContactSensor) && accessory.context.mode === "in") {
+              accessory.getService(Service.ContactSensor).getCharacteristic(Characteristic.ContactSensorState).getValue();
+            }
           }
         }
       
-      // Setup next polling
-      self.statePolling();
+        // Setup next polling
+        platform.statePolling();
+  
   }, 2000);
 }
 
