@@ -29,7 +29,7 @@ function WPiPlatform(log, config, api) {
 
   //Configure wiring pi using 'sys' mode - requires pins to
   //have been exported via `gpio export`
-  //wpi.setup('sys');
+  wpi.setup('sys');
 
   if (api) {
       // Save the API object as plugin needs to register new accessory via this object.
