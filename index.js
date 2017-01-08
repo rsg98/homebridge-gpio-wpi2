@@ -1,7 +1,9 @@
-//var wpi = require('node-wiring-pi');
-var gpioExports = require('./readExports')();
+const wpi = require('node-wiring-pi');
+const sysfs = require('./readExports.js');
 
 var Accessory, Service, Characteristic, UUIDGen;
+
+
 
 module.exports = function(homebridge) {
   
@@ -51,24 +53,35 @@ function WPiPlatform(log, config, api) {
 WPiPlatform.prototype.configureAccessory = function(accessory) {
   this.log(accessory.displayName, "Configure GPIO Pin", accessory.UUID);
   var platform = this;
-  accessory.reachable = true;
 
   if(platform.config.overrideCache === "true") {
     var newContext = platform.gpiopins.find( p => p.name === accessory.context.name );
     accessory.context = newContext;
   }
 
+  //Check reachability by querying the sysfs path
+  var exportState = sysfs(accessory.context.pin);
+
+  if(!exportState.error) {
+    if(exportState.direction === accessory.context.mode) {
+      accessory.reachable = true;
+    }
+  }
+
+  accessory.reachable = true;
+
+  
   if (accessory.getService(Service.Switch) && accessory.context.mode === "out") {
     accessory.getService(Service.Switch)
       .getCharacteristic(Characteristic.On)
-      .on('get', this.getOn.bind(this))
-      .on('set', this.setOn.bind(this));
+      .on('get', this.getOn.bind(accessory))
+      .on('set', this.setOn.bind(accessory));
   }
 
   if (accessory.getService(Service.ContactSensor) && accessory.context.mode === "in") {
     accessory.getService(Service.ContactSensor)
       .getCharacteristic(Characteristic.ContactSensorState)
-      .on('get', this.getOn.bind(this));
+      .on('get', this.getOn.bind(accessory));
   }
 
   // Handle the 'identify' event
@@ -128,17 +141,45 @@ WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
 }
 
 WPiPlatform.prototype.getOn = function(callback) {
+    var inverted = (this.context.inverted === "true");
     // inverted XOR pin_value
+    var on = ( inverted != wpi.digitalRead(this.context.pin) );
     console.log("Pin ON");
     var on = 1;
     callback(null, on);
 }
 
 WPiPlatform.prototype.setOn = function(on, callback) {
-    // inverted XOR pin_value
-    console.log("Pin to " + on);
+    var inverted = (this.context.inverted === "true");
+    var duration = this.context.duration;
 
-    callback(null, on);
+    if (on) {
+        this.pinAction(!inverted * 1);
+        if (is_defined(duration) && is_int(duration)) {
+            this.pinTimer()
+        }
+        callback(null);
+    } else {
+        this.pinAction(inverted * 1);
+        callback(null);
+    }
+}
+
+WPiPlatform.prototype.pinAction = function(pin, inverted, action) {
+    this.log('Turning ' + (action == (!inverted * 1) ? 'on' : 'off') + ' pin #' + pin);
+
+    wpi.digitalWrite(pin, action);
+    var success = (wpi.digitalRead(pin) == action);
+    return success;
+}
+
+WPiPlatform.prototype.pinTimer = function() {
+    var self = this;
+    setTimeout(function() {
+        self.log('Timer expired ' + self.duration + 'ms');
+        self.pinAction(self.inverted * 1);
+        self.service.getValue();
+    }, self.duration);
 }
 
 

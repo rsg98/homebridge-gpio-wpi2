@@ -1,30 +1,27 @@
 var fs = require('fs');
 
-const MAX_GPIO = 64;
 const SYSFS_GPIO = '/sys/class/gpio/gpio';
 
-module.exports = function() {
-    var gpioexports = [];
-    for(var i=0; i < MAX_GPIO; ++i){
-      try {
-          fs.accessSync(SYSFS_GPIO + i, fs.F_OK);
+function ReadExport (pin) {
+      var gpio;
 
-          var direction = fs.readFileSync(SYSFS_GPIO + i + '/direction', 'utf8');
-          var value = fs.readFileSync(SYSFS_GPIO + i + '/value', 'utf8');
+      try {
+          fs.accessSync(SYSFS_GPIO + pin, fs.F_OK);
+
+          var direction = fs.readFileSync(SYSFS_GPIO + pin + '/direction', 'utf8');
+          var value = fs.readFileSync(SYSFS_GPIO + pin + '/value', 'utf8');
 
           var gpio = {
-            'pin': i,
+            'pin': pin,
             'direction': direction.trim(),
             'value': value.trim()
           };
 
-          gpioexports.push(gpio);
-
       } catch (e) {
-          var gpio = { 'pin': i, 'error': e.code };
-          gpioexports.push(gpio);
+          var gpio = { 'pin': pin, 'error': e.code };
       }
-    }
 
-    return(gpioexports);
+    return(gpio);
 }
+
+module.exports = ReadExport;
