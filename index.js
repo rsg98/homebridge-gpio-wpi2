@@ -20,7 +20,7 @@ module.exports = function(homebridge) {
 
 // Platform constructor
 function WPiPlatform(log, config, api) {
-  log("WORK IN PROGRESS... I DON'T WORK YET!");
+  log("WORK IN PROGRESS... Report issues on https://github.com/rsg98/homebridge-gpio-wpi2");
   var platform = this;
   this.log = log;
   this.config = config;
@@ -144,8 +144,6 @@ WPiPlatform.prototype.getOn = function(callback) {
     var inverted = (this.context.inverted === "true");
     // inverted XOR pin_value
     var on = ( inverted != wpi.digitalRead(this.context.pin) );
-    console.log("Pin ON");
-    var on = 1;
     callback(null, on);
 }
 
@@ -207,7 +205,6 @@ WPiPlatform.prototype.statePolling = function () {
   // Clear polling
   //clearTimeout(this.tout);
 
-  console.log("Polling...");
   // Setup periodic update with polling interval
   this.tout = setTimeout(function () {
         // Update states for all HomeKit accessories

@@ -15,7 +15,7 @@ Uses wiringPi as a back end to give non-root access to GPIO.
 ## Requirements
 
 -	[Homebridge](https://github.com/nfarina/homebridge) - _HomeKit support for the impatient_
--	[wiring-pi](https://github.com/eugeneware/wiring-pi) - _Node.js bindings to wiringPi_
+-	[node-wiring-pi](https://github.com/rsg98/node-wiring-pi) - _Node.js bindings to wiringPi_
 
 ## Installation
 
@@ -24,8 +24,6 @@ Uses wiringPi as a back end to give non-root access to GPIO.
 3.	Update your configuration file - see `config-platform-sample.json` in this repo
 
 ## Configuration
-
-Example `config.json`
 
 ```json
 { 
@@ -40,7 +38,8 @@ Example `config.json`
 		        "mode" : "out",
                 "pull" : "down",
 		        "inverted" : "false",
-                "duration" : 0
+                "duration" : 0,
+                "polling" : "true"
 	        },{
 		        "name" : "GPIO3",
 		        "pin"  : 22,
@@ -64,6 +63,7 @@ Example `config.json`
 | `pull` | up / down / off | Configuration for the built in Pi pull up resistor |
 | `inverted` | true / false | Reverse the behaviour of the GPIO pin (0 is on, 1 is off) |
 | `duration` | number | Pin will turn off after this number of miliseconds |
+| `polling` | true / false | Whether Homebridge should periodically check the status of the pin (perhaps it's being set by something external to homebridge) |
 
 
 ## Pin Configuration
