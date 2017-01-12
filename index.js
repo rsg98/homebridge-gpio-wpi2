@@ -1,4 +1,4 @@
-const wpi = require('node-wiring-pi');
+//const wpi = require('node-wiring-pi');
 
 const sysfs = require('./readExports.js');
 const GPIOAccessory = require('./GPIOAccessory.js');
@@ -16,6 +16,8 @@ module.exports = function(homebridge) {
   Characteristic = homebridge.hap.Characteristic;
   UUIDGen = homebridge.hap.uuid;
 
+  this.homebridge = homebridge;
+
   homebridge.registerPlatform("homebridge-gpio-wpi2", "WiringPiPlatform", WPiPlatform, false);
 }
 
@@ -30,7 +32,7 @@ function WPiPlatform(log, config, api) {
 
   //Configure wiring pi using 'sys' mode - requires pins to
   //have been exported via `gpio export`
-  wpi.setup('sys');
+  //wpi.setup('sys');
 
   if (api) {
       // Save the API object as plugin needs to register new accessory via this object.
@@ -70,8 +72,8 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
   }
 
   accessory.reachable = true;
-
-  var gpioAccessory = new GPIOAccessory(platform.log, accessory, wpi, Service);
+var wpi;
+  var gpioAccessory = new GPIOAccessory(platform.log, accessory, wpi, this.homebridge);
 
   
   if (accessory.getService(Service.Switch) && accessory.context.mode === "out") {

@@ -1,14 +1,18 @@
 'use strict';
 
-function GPIOAccessory(log, accessory, wpi, service)
+var Service, Characteristic
+
+function GPIOAccessory(log, accessory, wpi, homebridge)
 {
     var self = this;
+
+    Service = homebridge.hap.Service;
+    Characteristic = homebridge.hap.Characteristic;
 
     this.accessory = accessory;
     this.log = log;
     this.context = accessory.context;
     this.wpi = wpi;
-    this.Service = service;
     this.inverted = (this.context.inverted === "true");
 }
 
@@ -46,7 +50,7 @@ GPIOAccessory.prototype.pinTimer = function() {
     setTimeout(function() {
         self.log('Timer expired ' + self.context.duration + 'ms');
         self.pinAction(self.inverted * 1);
-        self.accessory.getService(this.Service.Switch).getValue();
+        self.accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).getValue();
     }, self.context.duration);
 }
 
