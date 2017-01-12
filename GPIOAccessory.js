@@ -1,6 +1,6 @@
 'use strict';
 
-function GPIOAccessory(log, accessory, wpi)
+function GPIOAccessory(log, accessory, wpi, service)
 {
     var self = this;
 
@@ -8,7 +8,7 @@ function GPIOAccessory(log, accessory, wpi)
     this.log = log;
     this.context = accessory.context;
     this.wpi = wpi;
-
+    this.Service = service;
     this.inverted = (this.context.inverted === "true");
 }
 
@@ -44,10 +44,10 @@ GPIOAccessory.prototype.pinAction = function(action) {
 GPIOAccessory.prototype.pinTimer = function() {
     var self = this;
     setTimeout(function() {
-        self.log('Timer expired ' + self.duration + 'ms');
+        self.log('Timer expired ' + self.context.duration + 'ms');
         self.pinAction(self.inverted * 1);
-        self.accessory.getService('Service.Switch').getValue();
-    }, self.duration);
+        self.accessory.getService(this.Service.Switch).getValue();
+    }, self.context.duration);
 }
 
 // Check value is a +ve integer

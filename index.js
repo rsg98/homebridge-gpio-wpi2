@@ -71,7 +71,7 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
 
   accessory.reachable = true;
 
-  var gpioAccessory = new GPIOAccessory(platform.log, accessory, wpi);
+  var gpioAccessory = new GPIOAccessory(platform.log, accessory, wpi, Service);
 
   
   if (accessory.getService(Service.Switch) && accessory.context.mode === "out") {
