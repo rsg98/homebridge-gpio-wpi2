@@ -73,7 +73,7 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
   
   var onChar;
   if (accessory.getService(Service.Switch)) { 
-    onChar = accessory.getService(Switch.Service).getCharacteristic(Characteristic.On);
+    onChar = accessory.getService(Service.Switch).getCharacteristic(Characteristic.On);
   }
   
   var gpioAccessory = new GPIOAccessory(platform.log, accessory, wpi, onChar);
