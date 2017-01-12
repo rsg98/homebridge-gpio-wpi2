@@ -1,8 +1,9 @@
 const wpi = require('node-wiring-pi');
+
 const sysfs = require('./readExports.js');
+const GPIOAccessory = require('./GPIOAccessory.js');
 
 var Accessory, Service, Characteristic, UUIDGen;
-
 
 
 module.exports = function(homebridge) {
@@ -70,18 +71,20 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
 
   accessory.reachable = true;
 
+  var gpioAccessory = new GPIOAccessory(platform.log, accessory, wpi);
+
   
   if (accessory.getService(Service.Switch) && accessory.context.mode === "out") {
     accessory.getService(Service.Switch)
       .getCharacteristic(Characteristic.On)
-      .on('get', this.getOn.bind(accessory))
-      .on('set', this.setOn.bind(accessory));
+      .on('get', gpioAccessory.getOn.bind(gpioAccessory))
+      .on('set', gpioAccessory.setOn.bind(gpioAccessory));
   }
 
   if (accessory.getService(Service.ContactSensor) && accessory.context.mode === "in") {
     accessory.getService(Service.ContactSensor)
       .getCharacteristic(Characteristic.ContactSensorState)
-      .on('get', this.getOn.bind(accessory));
+      .on('get', gpioAccessory.getOn.bind(gpioAccessory));
   }
 
   // Handle the 'identify' event
@@ -140,45 +143,7 @@ WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
   }
 }
 
-WPiPlatform.prototype.getOn = function(callback) {
-    var inverted = (this.context.inverted === "true");
-    // inverted XOR pin_value
-    var on = ( inverted != wpi.digitalRead(this.context.pin) );
-    callback(null, on);
-}
 
-WPiPlatform.prototype.setOn = function(on, callback) {
-    var inverted = (this.context.inverted === "true");
-    var duration = this.context.duration;
-
-    if (on) {
-        this.pinAction(!inverted * 1);
-        if (is_defined(duration) && is_int(duration)) {
-            this.pinTimer()
-        }
-        callback(null);
-    } else {
-        this.pinAction(inverted * 1);
-        callback(null);
-    }
-}
-
-WPiPlatform.prototype.pinAction = function(pin, inverted, action) {
-    this.log('Turning ' + (action == (!inverted * 1) ? 'on' : 'off') + ' pin #' + pin);
-
-    wpi.digitalWrite(pin, action);
-    var success = (wpi.digitalRead(pin) == action);
-    return success;
-}
-
-WPiPlatform.prototype.pinTimer = function() {
-    var self = this;
-    setTimeout(function() {
-        self.log('Timer expired ' + self.duration + 'ms');
-        self.pinAction(self.inverted * 1);
-        self.service.getValue();
-    }, self.duration);
-}
 
 
 WPiPlatform.prototype.updateAccessoriesReachability = function() {
@@ -226,5 +191,3 @@ WPiPlatform.prototype.statePolling = function () {
   
   }, 2000);
 }
-
-

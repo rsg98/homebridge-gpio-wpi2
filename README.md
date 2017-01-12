@@ -4,7 +4,7 @@
 
 ## WORK IN PROGRESS
 
-**Don't use me yet!**
+Please report issues at https://github.com/rsg98/homebridge-gpio-wpi2/issues
 
 ***
 
@@ -17,10 +17,14 @@ Uses wiringPi as a back end to give non-root access to GPIO.
 -	[Homebridge](https://github.com/nfarina/homebridge) - _HomeKit support for the impatient_
 -	[node-wiring-pi](https://github.com/rsg98/node-wiring-pi) - _Node.js bindings to wiringPi_
 
+This version of the plugin expects WiringPi itself to already be installed - see the documentation for [node-wiring-pi](https://github.com/rsg98/node-wiring-pi)
+for more details, or just follow the instructions below for Raspbian.
+
 ## Installation
 
-1.	Install Homebridge using `npm install -g homebridge`
-2.	Install this plugin `npm install -g homebridge-gpio-wpi2`
+1.	Install the wiringpi package using `sudo apt-get install wiringpi`
+2.    Install Homebridge using `sudo npm install -g homebridge`
+2.	Install this plugin `sudo npm install -g homebridge-gpio-wpi2`
 3.	Update your configuration file - see `config-platform-sample.json` in this repo
 
 ## Configuration
@@ -30,23 +34,23 @@ Uses wiringPi as a back end to give non-root access to GPIO.
     "platforms": [{
           "platform" : "WiringPiPlatform",
           "name" : "Pi GPIO (WiringPi)",
-          "overrideCache" : "false",
-	        "gpiopins" : [{
-		        "name" : "GPIO2",
-		        "pin"  : 27,
+          "overrideCache" : "true",
+          "gpiopins" : [{
+                "name" : "GPIO2",
+		    "pin"  : 27,
                 "enabled" : "true",
-		        "mode" : "out",
+		    "mode" : "out",
                 "pull" : "down",
-		        "inverted" : "false",
+		    "inverted" : "false",
                 "duration" : 0,
                 "polling" : "true"
 	        },{
-		        "name" : "GPIO3",
-		        "pin"  : 22,
+		    "name" : "GPIO3",
+		    "pin"  : 22,
                 "enabled" : "true",
-		        "mode" : "out",
+		    "mode" : "out",
                 "pull" : "down",
-		        "inverted" : "false",
+		    "inverted" : "false",
                 "duration" : 0
           }]
     }]
@@ -59,7 +63,7 @@ Uses wiringPi as a back end to give non-root access to GPIO.
 | `name` | string | Initial display name for the PIN accessory - can be renamed in HomeKit app (e.g. Home) |
 | `pin` | number | The BCM pin number - see Pin Configuration below |
 | `enabled` | true / false | Whether you want the module to publish this pin as an accessory |
-| `mode` | out / in | Mode the pin should operate in (only "out" currently really works) |
+| `mode` | out / in | Mode the pin should operate in |
 | `pull` | up / down / off | Configuration for the built in Pi pull up resistor |
 | `inverted` | true / false | Reverse the behaviour of the GPIO pin (0 is on, 1 is off) |
 | `duration` | number | Pin will turn off after this number of miliseconds |
