@@ -16,8 +16,6 @@ module.exports = function(homebridge) {
   Characteristic = homebridge.hap.Characteristic;
   UUIDGen = homebridge.hap.uuid;
 
-  this.homebridge = homebridge;
-
   homebridge.registerPlatform("homebridge-gpio-wpi2", "WiringPiPlatform", WPiPlatform, false);
 }
 
@@ -72,7 +70,13 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
   }
 
   accessory.reachable = true;
-  var gpioAccessory = new GPIOAccessory(platform.log, accessory, wpi, this.homebridge);
+  
+  var onChar;
+  if (accessory.getService(Service.Switch)) { 
+    onChar = accessory.getService(Switch.Service).getCharacteristic(Characteristic.On);
+  }
+  
+  var gpioAccessory = new GPIOAccessory(platform.log, accessory, wpi, onChar);
 
   
   if (accessory.getService(Service.Switch) && accessory.context.mode === "out") {
