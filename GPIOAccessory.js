@@ -37,7 +37,7 @@ GPIOAccessory.prototype.pinAction = function(action) {
     this.log('Turning ' + (action == (!this.inverted * 1) ? 'on' : 'off') + ' pin #' + this.context.pin);
 
     this.wpi.digitalWrite(this.context.pin, action);
-    var success = (wpi.digitalRead(this.context.pin) == action);
+    var success = (this.wpi.digitalRead(this.context.pin) == action);
     return success;
 }
 
@@ -50,6 +50,13 @@ GPIOAccessory.prototype.pinTimer = function() {
     }, self.duration);
 }
 
+// Check value is a +ve integer
+var is_int = function(n) {
+    return (n > 0) && (n % 1 === 0);
+}
 
+var is_defined = function(v) {
+    return typeof v !== 'undefined';
+}
 
 module.exports = GPIOAccessory;
