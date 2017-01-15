@@ -1,7 +1,8 @@
 const wpi = require('node-wiring-pi');
 
-const sysfs = require('./readExports.js');
-const GPIOAccessory = require('./GPIOAccessory.js');
+const sysfs = require('./lib/readExports.js');
+const GPIOAccessory = require('./lib/GPIOAccessory.js');
+const AutoExport = require('./lib/autoExport.js');
 
 var Accessory, Service, Characteristic, UUIDGen;
 
@@ -27,6 +28,12 @@ function WPiPlatform(log, config, api) {
   this.config = config;
   this.gpiopins = this.config.gpiopins || [];
   this.accessories = [];
+
+  //Export pins via sysfs if enabled with autoExport
+  if((typeof this.config.autoExport !== undefined) && (this.config.autoExport === "true"))
+  {
+      AutoExport(this.log, this.gpiopins);
+  }
 
   //Configure wiring pi using 'sys' mode - requires pins to
   //have been exported via `gpio export`

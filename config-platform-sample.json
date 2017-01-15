@@ -4,6 +4,7 @@
             "platform" : "WiringPiPlatform",
             "name" : "Pi GPIO (WiringPi)",
             "overrideCache" : "false",
+            "autoExport" : "true",
 	        "gpiopins" : [{
 		        "name" : "GPIO2",
 		        "pin"  : 27,
