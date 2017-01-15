@@ -24,10 +24,19 @@ for more details, or just follow the instructions below for Raspbian.
 
 1.	Install the wiringpi package using `sudo apt-get install wiringpi`
 2.    Install Homebridge using `sudo npm install -g homebridge`
-2.	Install this plugin `sudo npm install -g homebridge-gpio-wpi2`
-3.	Update your configuration file - see `config-platform-sample.json` in this repo
+3.	Install this plugin `sudo npm install -g homebridge-gpio-wpi2`
+4.	Update your configuration file - see `config-platform-sample.json` in this repo
+5.    Make sure your `homebridge` user is in the `gpio` group.
+
+ ```Shell
+  $ sudo usermod -G gpio homebridge
+ ```
 
 ## Configuration
+
+**The pin numbers used in this config file are the BCM pin numbers, not the physical pins or WiringPi pin numbers.**
+
+You can run `gpio readall` to generate a table showing how the BCM pin numbers map to the physical pins, which varies between models of Raspberry Pi.
 
 ```json
 { 
@@ -35,45 +44,59 @@ for more details, or just follow the instructions below for Raspbian.
           "platform" : "WiringPiPlatform",
           "name" : "Pi GPIO (WiringPi)",
           "overrideCache" : "true",
+          "autoExport" : "true",
           "gpiopins" : [{
                 "name" : "GPIO2",
-		    "pin"  : 27,
+                "pin"  : 27,
                 "enabled" : "true",
-		    "mode" : "out",
+                "mode" : "out",
                 "pull" : "down",
-		    "inverted" : "false",
+                "inverted" : "false",
                 "duration" : 0,
                 "polling" : "true"
 	        },{
-		    "name" : "GPIO3",
-		    "pin"  : 22,
+                "name" : "GPIO3",
+                "pin"  : 22,
                 "enabled" : "true",
-		    "mode" : "out",
+                "mode" : "out",
                 "pull" : "down",
-		    "inverted" : "false",
+                "inverted" : "false",
                 "duration" : 0
           }]
     }]
 }
 
 ```
+### Platform Config Items
 
 | Config Item | Valid Values | Description |
 | --- | --- | --- |
-| `name` | string | Initial display name for the PIN accessory - can be renamed in HomeKit app (e.g. Home) |
-| `pin` | number | The BCM pin number - see Pin Configuration below |
-| `enabled` | true / false | Whether you want the module to publish this pin as an accessory |
-| `mode` | out / in | Mode the pin should operate in |
-| `pull` | up / down / off | Configuration for the built in Pi pull up resistor |
-| `inverted` | true / false | Reverse the behaviour of the GPIO pin (0 is on, 1 is off) |
-| `duration` | number | Pin will turn off after this number of miliseconds |
-| `polling` | true / false | Whether Homebridge should periodically check the status of the pin (perhaps it's being set by something external to homebridge) |
+| `platform` | `WiringPiPlatform` | Must be set to this value to initialise this plugin |
+| `name` | `string` | What you want this platform to be called (appears in the logs and such like) |
+| `overrideCache` | `true / false` | Homebridge will cache all your accessories - setting this to true will ignore the cached value (direction, mode, etc.) and read them direcly from your config file |
+| `autoExport` | `true / false` | As long as your homebridge user has permission (i.e. is a member of the `gpio` group), setting this to `true` will automatically export the pins via sysfs, meaning you _don't_ need a set-gpio.sh script |
+
+
+### Pin Config Items
+
+| Config Item | Valid Values | Description |
+| --- | --- | --- |
+| `name` | `string` | Initial display name for the PIN accessory - can be renamed in HomeKit app (e.g. Home) |
+| `pin` | `number` | The BCM pin number - see Pin Configuration below |
+| `enabled` | `true / false` | Whether you want the module to publish this pin as an accessory |
+| `mode` | `out / in` | Mode the pin should operate in |
+| `pull` | `up / down / off` | Configuration for the built in Pi pull up resistor |
+| `inverted` | `true / false` | Reverse the behaviour of the GPIO pin (0 is on, 1 is off) |
+| `duration` | `number` | Pin will turn off after this number of miliseconds |
+| `polling` | `true / false` | Whether Homebridge should periodically check the status of the pin (perhaps it's being set by something external to homebridge) |
 
 
 ## Pin Configuration
 
-You need to configure the relevant GPIO pins using the [gpio utility](https://projects.drogon.net/raspberry-pi/wiringpi/the-gpio-utility/
+If you don't use the `autoExport` option above, you'll need to manually configure the relevant GPIO pins using the [gpio utility](https://projects.drogon.net/raspberry-pi/wiringpi/the-gpio-utility/
 ) included with wiringPi.
+
+This _is not_ necessary if you use autoExport and your homebridge user is a member of the `gpio` group.
 
 ```Shell
 $ gpio readall
@@ -122,12 +145,18 @@ $ node make-gpio-script config.json set-gpio.sh
 
 ### Homebridge reports no errors, but nothing is switched on or off
 
- Check the permissions in /sys/class/gpio/gpioXX.  You should run the `set-gpio.sh`
- script as the homebridge user, or ensure that the user is a member of the gpio
- group.
+ Check the permissions in /sys/class/gpio/gpioXX - `autoExport` option should have created all these properly, if your Homebridge
+ user account has the right permissions (i.e. is a member of the `gpio` group)
 
  ```Shell
   $ sudo usermod -G gpio homebridge
+ ```
+ 
+ If you are not using `autoExport`, you should run the `set-gpio.sh`
+ script as the homebridge user (see section above to generate this script):
+
+ ```Shell
+ $ node make-gpio-script config.json set-gpio.sh
  ```
 
 ## Licence
