@@ -1,5 +1,6 @@
 const wpi = require('node-wiring-pi');
 
+
 const sysfs = require('./lib/readExports.js');
 const GPIOAccessory = require('./lib/GPIOAccessory.js');
 const AutoExport = require('./lib/autoExport.js');
@@ -70,14 +71,14 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
   //Check reachability by querying the sysfs path
   var exportState = sysfs(accessory.context.pin);
 
+  accessory.reachable = false;
+
   if(!exportState.error) {
     if(exportState.direction === accessory.context.mode) {
       accessory.reachable = true;
     }
   }
 
-  accessory.reachable = true;
-  
   var onChar;
   if (accessory.getService(Service.Switch)) { 
     onChar = accessory.getService(Service.Switch).getCharacteristic(Characteristic.On);
@@ -97,6 +98,11 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
     accessory.getService(Service.ContactSensor)
       .getCharacteristic(Characteristic.ContactSensorState)
       .on('get', gpioAccessory.getOn.bind(gpioAccessory));
+
+      platform.log("Setting up interrupt callback");
+      gpioAccessory.interruptPoll(function() {
+        accessory.getService(Service.ContactSensor).getCharacteristic(Characteristic.ContactSensorState).getValue();
+      });
   }
 
   // Handle the 'identify' event
@@ -174,13 +180,9 @@ WPiPlatform.prototype.removeAccessory = function(accessory) {
   this.accessories = [];
 }
 
-
 // Method for state periodic update
 WPiPlatform.prototype.statePolling = function () {
   var platform = this;
-  
-  // Clear polling
-  //clearTimeout(this.tout);
 
   // Setup periodic update with polling interval
   this.tout = setTimeout(function () {
@@ -192,9 +194,9 @@ WPiPlatform.prototype.statePolling = function () {
               accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).getValue();
             }
 
-            if (accessory.getService(Service.ContactSensor) && accessory.context.mode === "in") {
+            /*if (accessory.getService(Service.ContactSensor) && accessory.context.mode === "in") {
               accessory.getService(Service.ContactSensor).getCharacteristic(Characteristic.ContactSensorState).getValue();
-            }
+            }*/
           }
         }
       
