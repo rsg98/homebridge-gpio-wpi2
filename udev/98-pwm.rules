@@ -1,0 +1,13 @@
+# Place in /etc/udev/rules.d
+# Configures PWM to be accessible by members of the gpio group
+
+# pwm_bcm2835 driver doesn't seem to generate uevents when export/unexport'ing (unlike gpio)
+# - so manually trigger the udev rules elsewhere by writing "add" into the pwmchip0/uevent
+# - after exporting.
+
+SUBSYSTEM=="pwm*", PROGRAM="/bin/sh -c '\
+	chown -R root:gpio /sys/class/pwm && chmod -R 770 /sys/class/pwm;\
+	chown -R root:gpio /sys/devices/platform/soc/*.pwm/ && chmod -R 770 /sys/devices/platform/soc/*.pwm/;\
+	chown -R root:gpio /sys$devpath && chmod -R 770 /sys$devpath\
+'" 
+
