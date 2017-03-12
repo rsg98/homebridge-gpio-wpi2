@@ -53,6 +53,14 @@
                 "pull" : "down",
 		        "inverted" : "false",
                 "duration" : 0
+	        },{
+		        "name" : "PWM0",
+		        "pin"  : 0,
+                "pwmchip" : 0,
+                "enabled" : "true",
+		        "mode" : "pwm",
+		        "inverted" : "false",
+                "period" : 1000000
 	        }]
         }
     ]
