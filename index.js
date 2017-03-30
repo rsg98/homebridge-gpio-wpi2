@@ -62,11 +62,13 @@ function WPiPlatform(log, config, api) {
 WPiPlatform.prototype.configureAccessory = function(accessory) {
   this.log(accessory.displayName, "Configure GPIO Pin", accessory.UUID);
   var platform = this;
+  var gpioAccessory;
 
-  if(platform.config.overrideCache === "true") {
+  //Disabled while this is refactored for pwm...
+  /*if(platform.config.overrideCache === "true") {
     var newContext = platform.gpiopins.find( p => p.name === accessory.context.name );
     accessory.context = newContext;
-  }
+  }*/
 
   //Check reachability by querying the sysfs path
   var exportState = sysfs(accessory.context.pin);
@@ -79,30 +81,45 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
     }
   }
 
-  var onChar;
-  if (accessory.getService(Service.Switch)) { 
-    onChar = accessory.getService(Service.Switch).getCharacteristic(Characteristic.On);
-  }
-  
-  var gpioAccessory = new GPIOAccessory(platform.log, accessory, wpi, onChar);
+  switch(accessory.context.mode)
+  {
+    case "out":
+      //Output - configure switch
+      if (accessory.getService(Service.Switch)) { 
+        var onChar;
+        onChar = accessory.getService(Service.Switch).getCharacteristic(Characteristic.On);
 
-  
-  if (accessory.getService(Service.Switch) && accessory.context.mode === "out") {
-    accessory.getService(Service.Switch)
-      .getCharacteristic(Characteristic.On)
-      .on('get', gpioAccessory.getOn.bind(gpioAccessory))
-      .on('set', gpioAccessory.setOn.bind(gpioAccessory));
-  }
+        gpioAccessory = new GPIOAccessory(platform.log, accessory, wpi, onChar);
 
-  if (accessory.getService(Service.ContactSensor) && accessory.context.mode === "in") {
-    accessory.getService(Service.ContactSensor)
-      .getCharacteristic(Characteristic.ContactSensorState)
-      .on('get', gpioAccessory.getOn.bind(gpioAccessory));
+        accessory.getService(Service.Switch)
+          .getCharacteristic(Characteristic.On)
+          .on('get', gpioAccessory.getOn.bind(gpioAccessory))
+          .on('set', gpioAccessory.setOn.bind(gpioAccessory));
+      }
+      break;
+    case "in":
+      //Input - configure sensor
+      if (accessory.getService(Service.ContactSensor)) {
+        accessory.getService(Service.ContactSensor)
+          .getCharacteristic(Characteristic.ContactSensorState)
+          .on('get', gpioAccessory.getOn.bind(gpioAccessory));
 
-      platform.log("Setting up interrupt callback");
-      gpioAccessory.interruptPoll(function() {
-        accessory.getService(Service.ContactSensor).getCharacteristic(Characteristic.ContactSensorState).getValue();
-      });
+        platform.log("Setting up interrupt callback");
+        gpioAccessory.interruptPoll(function() {
+          accessory.getService(Service.ContactSensor).getCharacteristic(Characteristic.ContactSensorState).getValue();
+        });
+      }
+      break;
+    case "pwm":
+      //PWM - configure dimmable light
+      break;
+    case "statesw":
+      //Stateful switch - configure input and output pins
+      //TODO - statesw support
+      break;
+    default:
+      platform.log("WARNING: Unsupported GPIO Pin Mode (%s)", gpiopin.mode);
+      break;
   }
 
   // Handle the 'identify' event
@@ -112,17 +129,13 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
     callback();
   });
 
-
   this.accessories.push(accessory);
 }
 
-//Handler will be invoked when user try to config your plugin
-//Callback can be cached and invoke when nessary
 WPiPlatform.prototype.configurationRequestHandler = function(context, request, callback) {
   console.log("Not Implemented");
 }
 
-// Sample function to show how developer can add accessory dynamically from outside event
 WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
   var platform = this;
   var uuid;
@@ -149,6 +162,12 @@ WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
         break;
       case "in":
         newAccessory.addService(Service.ContactSensor, gpiopin.name);
+        break;
+      case "pwm":
+        newAccessory.addService(Service.LightBulb, gpiopin.name);
+        break;
+      case "statesw":
+        newAccessory.addService(Service.StatefulProgrammableSwitch. gpiopin.name);
         break;
       default:
         platform.log("WARNING: Unsupported GPIO Pin Mode (%s)", gpiopin.mode);

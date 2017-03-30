@@ -1,0 +1,71 @@
+'use strict';
+
+const EventEmitter = require('events');
+const SysFS = require('./sysfs-pwm.js');
+const FS = require('fs');
+
+var Service, Characteristic
+
+class PWMAccessory extends EventEmitter {
+    constructor(log, accessory, wpi)
+    {
+        super();
+        var self = this;
+
+        if (this.context.mode != "pwm") { 
+            throw Error("Tried to create a PWMAccessory where accessory mode is not pwm");
+        }
+
+        this.accessory = accessory;
+        this.log = log;
+        this.context = accessory.context;
+        this.wpi = wpi;
+        this.inverted = (this.context.inverted === "true");
+    }
+}
+
+PWMAccessory.prototype.getOn = function(callback) {
+    //Return any duty cycle > 
+    
+    // inverted XOR pin_value
+    var on = ( this.inverted != this.wpi.digitalRead(this.context.pin) );
+    callback(null, on);
+}
+
+PWMAccessory.prototype.setOn = function(on, callback) {
+    var duration = this.context.duration;
+
+    if (on) {
+        this.pinAction(!this.inverted * 1);
+        if (is_defined(duration) && is_int(duration)) {
+            this.pinTimer()
+        }
+        callback(null);
+    } else {
+        this.pinAction(this.inverted * 1);
+        callback(null);
+    }
+}
+
+PWMAccessory.prototype.setBrightness = function(level, callback) {
+
+}
+
+PWMAccessory.prototype.pinAction = function(action) {
+    this.log('Turning ' + (action == (!this.inverted * 1) ? 'on' : 'off') + ' pin #' + this.context.pin);
+
+    this.wpi.digitalWrite(this.context.pin, action);
+    var success = (this.wpi.digitalRead(this.context.pin) == action);
+    return success;
+}
+
+// Check value is a +ve integer
+var is_int = function(n) {
+    return (n > 0) && (n % 1 === 0);
+}
+
+var is_defined = function(v) {
+    return typeof v !== 'undefined';
+}
+
+module.exports = PWMAccessory;

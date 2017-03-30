@@ -39,10 +39,6 @@ Reboot, and you should get a:
 /sys/class/pwm/pwmchip0
 ```
 
-Install script...
+Next, copy the udev rules file from this repo (``udev/98-pwm.rules``) into ``/etc/udev/rules.d``
 
-Put udev rules in ``/etc/udev/rules.d``
-
-After enabling, write echo "add" > pwmchip0/uevent to trigger udev rules to run on new pwm[0-1] directories
-
-Use wirinpi to trigger the clocks to start (needs to happen before exporting pins)...
+Finally, you need to configure ``util/setPwm.js`` to run - as root - **before** starting ``homebridge``.  This starts the pwm clocks on the Pi.  If you don't do this, it just won't do anything!
