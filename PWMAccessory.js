@@ -21,25 +21,20 @@ class PWMAccessory extends EventEmitter {
         this.context = accessory.context;
         this.wpi = wpi;
         this.inverted = (this.context.inverted === "true");
+
+        this.sysfs = new SysFS(this.context.pwmchip, this.context.pin);
     }
 }
 
 PWMAccessory.prototype.getOn = function(callback) {
-    //Return any duty cycle > 
-    
     // inverted XOR pin_value
-    var on = ( this.inverted != this.wpi.digitalRead(this.context.pin) );
+    var on = ( this.inverted != this.sysfs.enable );
     callback(null, on);
 }
 
 PWMAccessory.prototype.setOn = function(on, callback) {
-    var duration = this.context.duration;
-
     if (on) {
         this.pinAction(!this.inverted * 1);
-        if (is_defined(duration) && is_int(duration)) {
-            this.pinTimer()
-        }
         callback(null);
     } else {
         this.pinAction(this.inverted * 1);
@@ -48,14 +43,15 @@ PWMAccessory.prototype.setOn = function(on, callback) {
 }
 
 PWMAccessory.prototype.setBrightness = function(level, callback) {
-
+    //Set duty cycle...
+    //Check what hap-nodejs uses as a value range.
 }
 
 PWMAccessory.prototype.pinAction = function(action) {
     this.log('Turning ' + (action == (!this.inverted * 1) ? 'on' : 'off') + ' pin #' + this.context.pin);
 
-    this.wpi.digitalWrite(this.context.pin, action);
-    var success = (this.wpi.digitalRead(this.context.pin) == action);
+    this.sysfs.enable(action);
+    var success = (this.sysfs.enable == action);
     return success;
 }
 
