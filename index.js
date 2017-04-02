@@ -83,6 +83,7 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
 
   switch(accessory.context.mode)
   {
+    //TODO Add some checks to see if the cache is out of sync
     case "out":
       //Output - configure switch
       if (accessory.getService(Service.Switch)) { 

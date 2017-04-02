@@ -8,9 +8,16 @@ Please report issues at https://github.com/rsg98/homebridge-gpio-wpi2/issues
 
 ***
 
-Supports triggering General Purpose Input Output (GPIO) pins on the Raspberry Pi.
+Provides general purpose input/output (GPIO) support for Homebridge running on a Raspberry Pi.
 
-Uses wiringPi as a back end to give non-root access to GPIO.
+Supports several modes for each pin:
+
+-  ``in`` - Read GPIO pin (digital), using epoll.
+-  ``out`` - Set a GPIO pin (digital)
+-  ``pwm`` - Use any PWM with a SYSFS driver to provide a dimmable light
+-  ``statesw`` - Combine and input and output pin to form a stateful programmable switch
+
+This plugin uses wiringPi as a back end to give non-root access to GPIO - so homebridge doesn't need to run as root.
 
 ## Requirements
 
@@ -31,6 +38,8 @@ for more details, or just follow the instructions below for Raspbian.
  ```Shell
   $ sudo usermod -G gpio homebridge
  ```
+6.    If you want to use PWM, see the [PWM Documentation](PWM.md)
+
 
 ## Configuration
 
@@ -84,7 +93,7 @@ You can run `gpio readall` to generate a table showing how the BCM pin numbers m
 | `name` | `string` | Initial display name for the PIN accessory - can be renamed in HomeKit app (e.g. Home) |
 | `pin` | `number` | The BCM pin number - see Pin Configuration below |
 | `enabled` | `true / false` | Whether you want the module to publish this pin as an accessory |
-| `mode` | `out / in` | Mode the pin should operate in |
+| `mode` | `out / in / pwm / statesw` | Mode the pin should operate in |
 | `pull` | `up / down / off` | Configuration for the built in Pi pull up resistor |
 | `inverted` | `true / false` | Reverse the behaviour of the GPIO pin (0 is on, 1 is off) |
 | `duration` | `number` | Pin will turn off after this number of miliseconds |
