@@ -24,7 +24,7 @@ for more details, or just follow the instructions below for Raspbian.
 
 1.	Install the wiringpi package using `sudo apt-get install wiringpi`
 2.    Install Homebridge using `sudo npm install -g homebridge`
-3.	Install this plugin `sudo npm install -g homebridge-gpio-wpi2`
+3.	Install this plugin `sudo npm install homebridge-gpio-wpi2`
 4.	Update your configuration file - see `config-platform-sample.json` in this repo
 5.    Make sure your `homebridge` user is in the `gpio` group.
 
@@ -39,7 +39,15 @@ for more details, or just follow the instructions below for Raspbian.
 You can run `gpio readall` to generate a table showing how the BCM pin numbers map to the physical pins, which varies between models of Raspberry Pi.
 
 ```json
-{ 
+{
+	"bridge": {
+		"name": "Homebridge",
+		"username": "CC:22:3D:E3:CE:30",
+		"port": 51826,
+		"pin": "031-45-155"
+    },
+    "description": "This is an example configuration file with one fake accessory and one fake platform.",
+
     "platforms": [{
           "platform" : "WiringPiPlatform",
           "name" : "Pi GPIO (WiringPi)",
