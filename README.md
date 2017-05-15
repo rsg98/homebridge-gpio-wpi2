@@ -168,6 +168,16 @@ $ node make-gpio-script config.json set-gpio.sh
  $ node make-gpio-script config.json set-gpio.sh
  ```
 
+### I get duplicate pins after I rename them, or the plugin is ignoring my settings
+
+  Homebridge caches accessory information in `accessories/cachedAccessories` - this file is under your homebridge directory.
+
+  You can safely delete this file and homebridge will recreate it.  **BUT** this cache is for all homebridge plugins; so any
+  settings they save into the cache would be lost when you delete it.
+
+  Note that you can't delete this file while Homebridge is running - it gets saved to disk when homebridge exits, so will
+  magically reappear.  Stop homebridge first, then delete this file.
+
 ## Licence
 
 (The MIT License)
