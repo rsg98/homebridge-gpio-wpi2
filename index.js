@@ -3,6 +3,7 @@ const wpi = require('node-wiring-pi');
 
 const sysfs = require('./lib/readExports.js');
 const GPIOAccessory = require('./lib/GPIOAccessory.js');
+const PWMAccessory = require('./lib/PWMAccessory.js');
 const AutoExport = require('./lib/autoExport.js');
 
 var Accessory, Service, Characteristic, UUIDGen;
@@ -87,7 +88,7 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
     case "out":
       //Output - configure switch
       if (accessory.getService(Service.Switch)) { 
-        var onChar;
+        var onChar, gpioAccessory;
         onChar = accessory.getService(Service.Switch).getCharacteristic(Characteristic.On);
 
         gpioAccessory = new GPIOAccessory(platform.log, accessory, wpi, onChar);
@@ -101,18 +102,29 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
     case "in":
       //Input - configure sensor
       if (accessory.getService(Service.ContactSensor)) {
+        var onChar, gpioAccessory;
+        onChar = accessory.getService(Service.ContactSensor).getCharacteristic(Characteristic.On);
+
+        gpioAccessory = new GPIOAccessory(platform.log, accessory, wpi, onChar);
+
         accessory.getService(Service.ContactSensor)
           .getCharacteristic(Characteristic.ContactSensorState)
           .on('get', gpioAccessory.getOn.bind(gpioAccessory));
 
-        platform.log("Setting up interrupt callback");
-        gpioAccessory.interruptPoll(function() {
-          accessory.getService(Service.ContactSensor).getCharacteristic(Characteristic.ContactSensorState).getValue();
-        });
+        if (accessory.context.polling) {
+          platform.log("Setting up interrupt callback");
+          gpioAccessory.interruptPoll(function() {
+            accessory.getService(Service.ContactSensor).getCharacteristic(Characteristic.ContactSensorState).getValue();
+          });
+        }
       }
       break;
     case "pwm":
       //PWM - configure dimmable light
+      if (accessory.getService(Service.LightBulb)) {
+        //TODO - pwm support
+        var pwmAccessory = new PWMAccessory(platform.log, accessory, wpi);
+      }
       break;
     case "statesw":
       //Stateful switch - configure input and output pins

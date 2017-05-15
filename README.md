@@ -30,8 +30,8 @@ for more details, or just follow the instructions below for Raspbian.
 ## Installation
 
 1.	Install the wiringpi package using `sudo apt-get install wiringpi`
-2.    Install Homebridge using `sudo npm install -g homebridge`
-3.	Install this plugin `sudo npm install -g homebridge-gpio-wpi2`
+2.    Install Homebridge using `sudo npm install homebridge`
+3.	Install this plugin `sudo npm install homebridge-gpio-wpi2`
 4.	Update your configuration file - see `config-platform-sample.json` in this repo
 5.    Make sure your `homebridge` user is in the `gpio` group.
 
