@@ -9,5 +9,7 @@ wpi.wiringPiSetup();
 //Run PWM in mark:space mode
 wpi.pwmSetMode(wpi.PWM_MODE_MS);
 
-//Divisor for clock
-wpi.pwmSetClock(25);
+//pwmFrequency in Hz = 19.2e6 Hz / pwmClock / pwmRange
+
+//Divisor for clock - 96 gives a 2kHz signal
+wpi.pwmSetClock(96);
