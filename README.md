@@ -48,7 +48,16 @@ for more details, or just follow the instructions below for Raspbian.
 You can run `gpio readall` to generate a table showing how the BCM pin numbers map to the physical pins, which varies between models of Raspberry Pi.
 
 ```json
-{ 
+{
+    "bridge": {
+          "name": "Homebridge",
+	    "username": "CC:22:3D:E3:CE:30",
+	    "port": 51826,
+	    "pin": "031-45-155"
+    },
+    
+    "description": "This is an example configuration for the homebridge-gpio-wpi2 plugin.  If you use this config, change the PIN.", 
+    
     "platforms": [{
           "platform" : "WiringPiPlatform",
           "name" : "Pi GPIO (WiringPi)",
