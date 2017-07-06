@@ -41,7 +41,7 @@ function WPiPlatform(log, config, api) {
   //WiringPi > 2.36 uses GPIOMEM by default, meaning root access is no longer
   //required - so not using 'sys' mode anymore (which means we can access other
   //previously root only features.
-  wpi.setup();
+  wpi.setup('gpio');
 
   if (api) {
       // Save the API object as plugin needs to register new accessory via this object.
