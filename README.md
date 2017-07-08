@@ -30,6 +30,27 @@ for more details, or just follow the instructions below for Raspbian.
 ## Installation
 
 1.	Install the wiringpi package using `sudo apt-get install wiringpi`
+
+Check the installation of the wiringpi package using ``gpio``:
+
+```
+$ gpio -v
+gpio version: 2.44
+Copyright (c) 2012-2017 Gordon Henderson
+This is free software with ABSOLUTELY NO WARRANTY.
+For details type: gpio -warranty
+
+Raspberry Pi Details:
+  Type: Pi 3, Revision: 02, Memory: 1024MB, Maker: Sony 
+  * Device tree is enabled.
+  *--> Raspberry Pi 3 Model B Rev 1.2
+  * This Raspberry Pi supports user-level GPIO access.
+```
+
+To properly support running as a non-root user, you need a version greater than 2.36 (first line) and support for user-level GPIO access (last line).
+
+Check you don't have multiple versions of wiringpi installed!
+
 2.    Install Homebridge using `sudo npm install homebridge`
 3.	Install this plugin `sudo npm install homebridge-gpio-wpi2`
 4.	Update your configuration file - see `config-platform-sample.json` in this repo
