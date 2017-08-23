@@ -123,7 +123,7 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
       break;
     case "pwm":
       //PWM - configure dimmable light
-      if (accessory.getService(Service.LightBulb)) {
+      if (accessory.getService(Service.Lightbulb)) {
         //TODO - pwm support
         var pwmAccessory = new PWMAccessory(platform.log, accessory, wpi);
       }
@@ -163,7 +163,7 @@ WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
 
   if (uuidExists == 0) {
     this.log("New GPIO from config.json: " + gpiopin.name + " (" + gpiopin.pin + ")");
-  
+    this.log(gpiopin);
     var newAccessory = new Accessory(gpiopin.name, uuid);
     
     newAccessory.getService(Service.AccessoryInformation)
@@ -179,7 +179,7 @@ WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
         newAccessory.addService(Service.ContactSensor, gpiopin.name);
         break;
       case "pwm":
-        newAccessory.addService(Service.LightBulb, gpiopin.name);
+        newAccessory.addService(Service.Lightbulb, gpiopin.name);
         break;
       case "statesw":
         newAccessory.addService(Service.StatefulProgrammableSwitch. gpiopin.name);
