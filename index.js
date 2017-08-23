@@ -161,7 +161,7 @@ WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
         //contains accessories from all plugins, or just this one - don't
         //trash other plugins accessoryCache!
         platform.log('overrideCache is true: removing cached instance of ' + item.displayName);
-        api.unregisterPlatformAccessories(undefined, undefined, [item]);
+        platform.api.unregisterPlatformAccessories(undefined, undefined, [item]);
       }
     return item.UUID == uuid;
   }).length;
