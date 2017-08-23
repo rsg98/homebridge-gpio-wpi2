@@ -160,7 +160,7 @@ WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
   this.log('Found cached accessory: ');
   this.log(cachedAccessory);
 
-  if(cachedAccessory.length == 0 && platform.config.overrideCache === "true")
+  if(cachedAccessory.length != 0 && platform.config.overrideCache === "true")
   {
     //If overrideCache is set, remove this accessory using the api method
     //Run here rather than in didFinishLoading, as not sure if this.accessories
