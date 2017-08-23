@@ -153,24 +153,25 @@ WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
 
   uuid = UUIDGen.generate(gpiopin.name);
 
-  //TODO : fixup this cache logic
-
-  var uuidExists = this.accessories.filter(function(item) {
+  var cachedAccessory = this.accessories.filter(function(item) {
     return item.UUID == uuid;
-  }).length;
+  });
 
-  if(uuidExists == 0 && platform.config.overrideCache === "true")
+  this.log('Found cached accessory: ');
+  this.log(cachedAccessory);
+
+  if(typeof(cachedAccessory) != "undefined" && platform.config.overrideCache === "true")
   {
     //If overrideCache is set, remove this accessory using the api method
     //Run here rather than in didFinishLoading, as not sure if this.accessories
     //contains accessories from all plugins, or just this one - don't
     //trash other plugins accessoryCache!
-    var cachedAccessory = platform.accessories.filter(item => item.UUID == uuid);
     platform.log('overrideCache is true: removing cached instance of ' + cachedAccessory.displayName);
-    platform.api.unregisterPlatformAccessories(undefined, undefined, cachedAccessory);
+    platform.api.unregisterPlatformAccessories(undefined, undefined, [cachedAccessory]);
+    cachedAccessory = undefined;
   }
 
-  if (uuidExists == 0 ) {
+  if (typeof(cachedAccessory) != "undefined") {
     this.log("New GPIO from config.json: " + gpiopin.name + " (" + gpiopin.pin + ")");
     var newAccessory = new Accessory(gpiopin.name, uuid);
     
