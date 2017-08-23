@@ -4,6 +4,8 @@
 
 ## WORK IN PROGRESS
 
+THIS IS AN ALPHA VERSION - which is different to the code on npm.js
+
 Please report issues at https://github.com/rsg98/homebridge-gpio-wpi2/issues
 
 ***
