@@ -59,7 +59,7 @@ Check you don't have multiple versions of wiringpi installed!
  ```Shell
   $ sudo usermod -G gpio homebridge
  ```
-6.    If you want to use PWM, see the [PWM Documentation](PWM.md)
+6.    If you want to use hardware PWM, see the [PWM Documentation](PWM.md)
 
 
 ## Configuration
