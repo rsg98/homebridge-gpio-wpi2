@@ -30,6 +30,7 @@ function WPiPlatform(log, config, api) {
   this.config = config;
   this.gpiopins = this.config.gpiopins || [];
   this.accessories = [];
+  this.api = api;
 
   //Export pins via sysfs if enabled with autoExport
   if((typeof this.config.autoExport !== undefined) && (this.config.autoExport === "true"))
@@ -66,12 +67,6 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
   this.log(accessory.displayName, "Configure GPIO Pin", accessory.UUID);
   var platform = this;
   var gpioAccessory;
-
-  //Disabled while this is refactored for pwm...
-  /*if(platform.config.overrideCache === "true") {
-    var newContext = platform.gpiopins.find( p => p.name === accessory.context.name );
-    accessory.context = newContext;
-  }*/
 
   //Check reachability by querying the sysfs path
   var exportState = sysfs(accessory.context.pin);
@@ -159,10 +154,24 @@ WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
   uuid = UUIDGen.generate(gpiopin.name);
 
   var uuidExists = this.accessories.filter(function(item) {
+    if(platform.config.overrideCache === "true")
+      {
+        //If overrideCache is set, remove this accessory using the api method
+        //Run here rather than in didFinishLoading, as not sure if this.accessories
+        //contains accessories from all plugins, or just this one - don't
+        //trash other plugins accessoryCache!
+        api.unregisterPlatformAccessories(undefined, undefined, [item]);
+      }
     return item.UUID == uuid;
   }).length;
 
-  if (uuidExists == 0) {
+    
+  if(platform.config.overrideCache === "true") {
+    var newContext = platform.gpiopins.find( p => p.name === accessory.context.name );
+    accessory.context = newContext;
+  }
+
+  if (uuidExists == 0 ) {
     this.log("New GPIO from config.json: " + gpiopin.name + " (" + gpiopin.pin + ")");
     this.log(gpiopin);
     var newAccessory = new Accessory(gpiopin.name, uuid);
