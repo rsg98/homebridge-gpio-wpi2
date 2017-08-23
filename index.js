@@ -160,7 +160,7 @@ WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
   this.log('Found cached accessory: ');
   this.log(cachedAccessory);
 
-  if(typeof(cachedAccessory) != "undefined" && platform.config.overrideCache === "true")
+  if(cachedAccessory != [] && platform.config.overrideCache === "true")
   {
     //If overrideCache is set, remove this accessory using the api method
     //Run here rather than in didFinishLoading, as not sure if this.accessories
@@ -168,10 +168,10 @@ WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
     //trash other plugins accessoryCache!
     platform.log('overrideCache is true: removing cached instance of ' + cachedAccessory.displayName);
     platform.api.unregisterPlatformAccessories(undefined, undefined, [cachedAccessory]);
-    cachedAccessory = undefined;
+    cachedAccessory = [];
   }
 
-  if (typeof(cachedAccessory) != "undefined") {
+  if (cachedAccessory != []) {
     this.log("New GPIO from config.json: " + gpiopin.name + " (" + gpiopin.pin + ")");
     var newAccessory = new Accessory(gpiopin.name, uuid);
     
