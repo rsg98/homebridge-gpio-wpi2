@@ -113,12 +113,13 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
           .getCharacteristic(Characteristic.ContactSensorState)
           .on('get', gpioAccessory.getOn.bind(gpioAccessory));
 
-        if (accessory.context.polling) {
+        //Deprecate .polling property - doesn't make any sense /not/ to poll an input
+          //if (accessory.context.polling) {
           platform.log("Setting up interrupt callback");
           gpioAccessory.interruptPoll(function() {
             accessory.getService(Service.ContactSensor).getCharacteristic(Characteristic.ContactSensorState).getValue();
           });
-        }
+        //}
       }
       break;
     case "pwm":
