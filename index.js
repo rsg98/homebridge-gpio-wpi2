@@ -160,16 +160,11 @@ WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
         //Run here rather than in didFinishLoading, as not sure if this.accessories
         //contains accessories from all plugins, or just this one - don't
         //trash other plugins accessoryCache!
+        platform.log('overrideCache is true: removing cached instance of ' + item.displayName);
         api.unregisterPlatformAccessories(undefined, undefined, [item]);
       }
     return item.UUID == uuid;
   }).length;
-
-    
-  if(platform.config.overrideCache === "true") {
-    var newContext = platform.gpiopins.find( p => p.name === accessory.context.name );
-    accessory.context = newContext;
-  }
 
   if (uuidExists == 0 ) {
     this.log("New GPIO from config.json: " + gpiopin.name + " (" + gpiopin.pin + ")");
