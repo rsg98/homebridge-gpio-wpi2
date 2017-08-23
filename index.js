@@ -157,17 +157,14 @@ WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
     return item.UUID == uuid;
   });
 
-  this.log('Found cached accessory: ');
-  this.log(cachedAccessory);
-
   if(cachedAccessory.length != 0 && platform.config.overrideCache === "true")
   {
     //If overrideCache is set, remove this accessory using the api method
     //Run here rather than in didFinishLoading, as not sure if this.accessories
     //contains accessories from all plugins, or just this one - don't
     //trash other plugins accessoryCache!
-    platform.log('overrideCache is true: removing cached instance of ' + cachedAccessory.displayName);
-    platform.api.unregisterPlatformAccessories(undefined, undefined, [cachedAccessory]);
+    platform.log('overrideCache is true: removing cached instance of ' + cachedAccessory[0].displayName);
+    platform.api.unregisterPlatformAccessories("homebridge-gpio-wpi2", "WiringPiPlatform", cachedAccessory);
     cachedAccessory.length = 0;
   }
 
