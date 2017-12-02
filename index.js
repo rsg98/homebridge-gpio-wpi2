@@ -1,39 +1,4 @@
-const wpi = require('node-wiring-pi');
-
-
-const sysfs = require('./lib/readExports.js');
-const GPIOAccessory = require('./lib/GPIOAccessory.js');
-const AutoExport = require('./lib/autoExport.js');
-
-var Accessory, Service, Characteristic, UUIDGen;
-
-
-module.exports = function(homebridge) {
-  
-  // Accessory must be created from PlatformAccessory Constructor
-  Accessory = homebridge.platformAccessory;
-
-  // Service and Characteristic are from hap-nodejs
-  Service = homebridge.hap.Service;
-  Characteristic = homebridge.hap.Characteristic;
-  UUIDGen = homebridge.hap.uuid;
-
-  homebridge.registerPlatform("homebridge-gpio-wpi2", "WiringPiPlatform", WPiPlatform, false);
-}
-
-// Platform constructor
-function WPiPlatform(log, config, api) {
-  log("WORK IN PROGRESS... Report issues on https://github.com/rsg98/homebridge-gpio-wpi2");
-  var platform = this;
-  this.log = log;
-  this.config = config;
-  this.gpiopins = this.config.gpiopins || [];
-  this.accessories = [];
-
-  //Export pins via sysfs if enabled with autoExport
-  if((typeof this.config.autoExport !== undefined) && (this.config.autoExport === "true"))
-  {
-      AutoExport(this.log, this.gpiopins);
+const wpi =log, this.gpiopins);
   }
 
   //Configure wiring pi using 'sys' mode - requires pins to
