@@ -105,6 +105,17 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
       });
   }
 
+  if (accessory.getService(Service.MotionSensor) && accessory.context.mode === "in") {
+      accessory.getService(Service.MotionSensor)
+          .getCharacteristic(Characteristic.MotionDetected)
+          .on('get', gpioAccessory.getOn.bind(gpioAccessory));
+
+      platform.log("Setting up interrupt callback");
+      gpioAccessory.interruptPoll(function () {
+          accessory.getService(Service.MotionSensor).getCharacteristic(Characteristic.MotionSensorState).getValue();
+      });
+  }
+
   // Handle the 'identify' event
   accessory.on('identify', function(paired, callback) {
     platform.log(accessory.displayName, "Identify!!!");
@@ -143,11 +154,14 @@ WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
       .setCharacteristic(Characteristic.Model, platform.config.model ? platform.config.model : "Pi GPIO")
       .setCharacteristic(Characteristic.SerialNumber, platform.config.serial ? platform.config.serial : "Default-SerialNumber");
 
-    switch(gpiopin.mode) {
-      case "out":
+    switch(true) {
+      case (gpiopin.mode === "out") && (gpiopin.type !== "MotionSensor"):
         newAccessory.addService(Service.Switch, gpiopin.name);
         break;
-      case "in":
+      case (gpiopin.mode === "in") && (gpiopin.type === "MotionSensor"):
+          newAccessory.addService(Service.MotionSensor, gpiopin.name);
+          break;
+      case (gpiopin.mode === "in"): //default to ContactSensor if type is not specified
         newAccessory.addService(Service.ContactSensor, gpiopin.name);
         break;
       default:
