@@ -116,6 +116,41 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
       });
   }
 
+
+if (accessory.getService(Service.LeakSensor) && accessory.context.mode === "in") {
+      accessory.getService(Service.LeakSensor)
+          .getCharacteristic(Characteristic.LeakDetected)
+          .on('get', gpioAccessory.getOn.bind(gpioAccessory));
+
+      platform.log("Setting up interrupt callback");
+      gpioAccessory.interruptPoll(function () {
+          accessory.getService(Service.LeakSensor).getCharacteristic(Characteristic.LeakDetected).getValue();
+      });
+  }
+
+if (accessory.getService(Service.SmokeSensor) && accessory.context.mode === "in") {
+      accessory.getService(Service.SmokeSensor)
+          .getCharacteristic(Characteristic.SmokeDetected)
+          .on('get', gpioAccessory.getOn.bind(gpioAccessory));
+
+      platform.log("Setting up interrupt callback");
+      gpioAccessory.interruptPoll(function () {
+          accessory.getService(Service.SmokeSensor).getCharacteristic(Characteristic.SmokeDetected).getValue();
+      });
+  }
+
+if (accessory.getService(Service.OccupancySensor) && accessory.context.mode === "in") {
+      accessory.getService(Service.OccupancySensor)
+          .getCharacteristic(Characteristic.OccupancyDetected)
+          .on('get', gpioAccessory.getOn.bind(gpioAccessory));
+
+      platform.log("Setting up interrupt callback");
+      gpioAccessory.interruptPoll(function () {
+          accessory.getService(Service.OccupancySensor).getCharacteristic(Characteristic.OccupancyDetected).getValue();
+      });
+  }
+
+
   // Handle the 'identify' event
   accessory.on('identify', function(paired, callback) {
     platform.log(accessory.displayName, "Identify!!!");
@@ -160,6 +195,15 @@ WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
         break;
       case (gpiopin.mode === "in") && (gpiopin.type === "MotionSensor"):
           newAccessory.addService(Service.MotionSensor, gpiopin.name);
+          break;
+      case (gpiopin.mode === "in") && (gpiopin.type === "LeakSensor"):
+          newAccessory.addService(Service.LeakSensor, gpiopin.name);
+          break;
+      case (gpiopin.mode === "in") && (gpiopin.type === "OccupancySensor"):
+          newAccessory.addService(Service.OccupancySensor, gpiopin.name);
+          break;
+      case (gpiopin.mode === "in") && (gpiopin.type === "SmokeSensor"):
+          newAccessory.addService(Service.SmokeSensor, gpiopin.name);
           break;
       case (gpiopin.mode === "in"): //default to ContactSensor if type is not specified
         newAccessory.addService(Service.ContactSensor, gpiopin.name);
