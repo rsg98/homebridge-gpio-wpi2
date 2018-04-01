@@ -1,11 +1,4 @@
 const wpi = require('node-wiring-pi');
-const chalk = require('chalk');
-const red = chalk.red.bold;
-const magenta = chalk.magenta.bold;
-const cyan = chalk.cyan.bold;
-const yellow = chalk.yellow.bold;
-const green = chalk.green.bold;
-
 
 
 const sysfs = require('./lib/readExports.js');
@@ -104,11 +97,7 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
   if (accessory.getService(Service.ContactSensor) && accessory.context.mode === "in") {
     accessory.getService(Service.ContactSensor)
       .getCharacteristic(Characteristic.ContactSensorState)
-      .on('get', gpioAccessory.getOn.bind(gpioAccessory))
-      .on('change', (data) => 
-          {
-            console.log("Contact Sensor " + cyan(accessory.context.name) +" Changed to new value of: " + cyan(data.newValue));
-        });
+      .on('get', gpioAccessory.getOn.bind(gpioAccessory));
 
       platform.log("Setting up interrupt callback");
       gpioAccessory.interruptPoll(function() {
@@ -119,11 +108,7 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
   if (accessory.getService(Service.MotionSensor) && accessory.context.mode === "in") {
       accessory.getService(Service.MotionSensor)
           .getCharacteristic(Characteristic.MotionDetected)
-          .on('get', gpioAccessory.getOn.bind(gpioAccessory))
-      .on('change', (data) => 
-          {
-            console.log("Motion Sensor " + cyan(accessory.context.name) +" Changed to new value of: " + cyan(data.newValue));
-        });
+          .on('get', gpioAccessory.getOn.bind(gpioAccessory));
 
       platform.log("Setting up interrupt callback");
       gpioAccessory.interruptPoll(function () {
