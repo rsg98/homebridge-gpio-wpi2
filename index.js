@@ -1,4 +1,5 @@
 const wpi = require('node-wiring-pi');
+const chalk = require('chalk');
 
 
 const sysfs = require('./lib/readExports.js');
