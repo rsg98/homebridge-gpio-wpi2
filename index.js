@@ -1,5 +1,11 @@
 const wpi = require('node-wiring-pi');
 const chalk = require('chalk');
+const red = chalk.red.bold;
+const magenta = chalk.magenta.bold;
+const cyan = chalk.cyan.bold;
+const yellow = chalk.yellow.bold;
+const green = chalk.green.bold;
+
 
 
 const sysfs = require('./lib/readExports.js');
@@ -98,7 +104,11 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
   if (accessory.getService(Service.ContactSensor) && accessory.context.mode === "in") {
     accessory.getService(Service.ContactSensor)
       .getCharacteristic(Characteristic.ContactSensorState)
-      .on('get', gpioAccessory.getOn.bind(gpioAccessory));
+      .on('get', gpioAccessory.getOn.bind(gpioAccessory))
+      .on('change', (data) => 
+          {
+            console.log(magenta("*Debug* CHANGE event for Contact Sensor, new value is: " + data.newValue));
+        });
 
       platform.log("Setting up interrupt callback");
       gpioAccessory.interruptPoll(function() {
