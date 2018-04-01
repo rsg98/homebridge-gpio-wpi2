@@ -107,7 +107,7 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
       .on('get', gpioAccessory.getOn.bind(gpioAccessory))
       .on('change', (data) => 
           {
-            console.log(magenta("*Debug* CHANGE event for Contact Sensor, new value is: " + data.newValue));
+            console.log("Contact Sensor " + cyan(accessory.context.name) +" Changed to new value of: " + cyan(data.newValue));
         });
 
       platform.log("Setting up interrupt callback");
@@ -119,7 +119,11 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
   if (accessory.getService(Service.MotionSensor) && accessory.context.mode === "in") {
       accessory.getService(Service.MotionSensor)
           .getCharacteristic(Characteristic.MotionDetected)
-          .on('get', gpioAccessory.getOn.bind(gpioAccessory));
+          .on('get', gpioAccessory.getOn.bind(gpioAccessory))
+      .on('change', (data) => 
+          {
+            console.log("Motion Sensor " + cyan(accessory.context.name) +" Changed to new value of: " + cyan(data.newValue));
+        });
 
       platform.log("Setting up interrupt callback");
       gpioAccessory.interruptPoll(function () {
