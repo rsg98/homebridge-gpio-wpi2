@@ -17,7 +17,6 @@
 	"dependencies": {
 		"node-wiring-pi": "^0.0.3",
 		"sleep": "^5.1.0",
-		"epoll" : "^0.1.21",
-		"chalk": ">=2.3.0"
+		"epoll" : "^0.1.21"
 	}
 }
