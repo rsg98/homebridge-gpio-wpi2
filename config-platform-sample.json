@@ -3,65 +3,26 @@
 	    "name": "Homebridge",
 	    "username": "CC:22:3D:E3:CE:30",
 	    "port": 51826,
-	    "pin": "031-45-155"
+	    "pin": "123-45-678"
     },
-    "description": "This is an example configuration file with one fake accessory and one fake platform.",
+    "description": "This is an example configuration file with ContactSensor, MotionSensor, and Switch types.",
 
     "platforms": [
         {
             "platform" : "WiringPiPlatform",
             "name" : "Pi GPIO (WiringPi)",
-            "overrideCache" : "false",
+            "overrideCache" : "true",
             "autoExport" : "true",
-	        "gpiopins" : [{
-		        "name" : "GPIO2",
-		        "pin"  : 27,
-                "enabled" : "true",
-		        "mode" : "out",
-                "pull" : "down",
-		        "inverted" : "false",
-                "duration" : 0
-	        },{
-		        "name" : "GPIO3",
-		        "pin"  : 22,
-                "enabled" : "true",
-		        "mode" : "out",
-                "pull" : "down",
-		        "inverted" : "false",
-                "duration" : 0
-            },{
-		        "name" : "GPIO4",
-		        "pin"  : 23,
-                "enabled" : "true",
-		        "mode" : "out",
-                "pull" : "down",
-		        "inverted" : "false",
-                "duration" : 0
-            },{
-		        "name" : "GPIO5",
-		        "pin"  : 24,
-                "enabled" : "true",
-		        "mode" : "out",
-                "pull" : "down",
-		        "inverted" : "false",
-                "duration" : 0
-            },{
-		        "name" : "GPIO6",
-		        "pin"  : 25,
-                "enabled" : "true",
-		        "mode" : "out",
-                "pull" : "down",
-		        "inverted" : "false",
-                "duration" : 0
-            },{
-		        "name" : "GPIO7",
-		        "pin"  : 4,
-                "enabled" : "true",
-		        "mode" : "out",
-                "pull" : "down",
-		        "inverted" : "false",
-                "duration" : 0
-	        }]
+	        "gpiopins" : 	
+		[
+			{	"type" : "ContactSensor",	"name" : "PHYSICAL_PIN_21", 	"pin": 9, 	"enabled": "true",	"mode": "in",	"pull": "down"	},
+			{	"type" : "LeakSensor",		"name" : "PHYSICAL_PIN_19", 	"pin": 10, 	"enabled": "true",	"mode": "in",	"pull": "down"	},
+			{	"type" : "OccupancySensor",	"name" : "PHYSICAL_PIN_23", 	"pin": 11, 	"enabled": "true",	"mode": "in",	"pull": "down"	},
+			{	"type" : "SmokeSensor",		"name" : "PHYSICAL_PIN_32", 	"pin": 12, 	"enabled": "true",	"mode": "in",	"pull": "down"	},
+			{	"type" : "MotionSensor",	"name" : "PHYSICAL_PIN_33", 	"pin": 13, 	"enabled": "true",	"mode": "in",	"pull": "down"	},
+			{ 	"type" : "Switch",		"name" : "PHYSICAL_PIN_13",     "pin": 27,	"enabled" : "true", 	"mode" : "out",	"pull" : "down", "inverted" : "false", "duration" : 0   }
+
+		]
         }
     ]
 }
