@@ -54,7 +54,8 @@ You can run `gpio readall` to generate a table showing how the BCM pin numbers m
           "overrideCache" : "true",
           "autoExport" : "true",
           "gpiopins" : [{
-                "name" : "GPIO2",
+	  	"type":"Switch",
+		"name" : "GPIO2",
                 "pin"  : 27,
                 "enabled" : "true",
                 "mode" : "out",
@@ -63,10 +64,11 @@ You can run `gpio readall` to generate a table showing how the BCM pin numbers m
                 "duration" : 0,
                 "polling" : "true"
 	        },{
+		"type":"MotionSensor",
                 "name" : "GPIO3",
                 "pin"  : 22,
                 "enabled" : "true",
-                "mode" : "out",
+                "mode" : "in",
                 "pull" : "down",
                 "inverted" : "false",
                 "duration" : 0
@@ -89,6 +91,7 @@ You can run `gpio readall` to generate a table showing how the BCM pin numbers m
 
 | Config Item | Valid Values | Description |
 | --- | --- | --- |
+| "type" | "string" | Type of device connected to GPIO. Set to "Switch" for "out" pin mode, or one of "ContactSensor", "LeakSensor", "MotionSensor", "OccupancySensor", or "SmokeSensor" for "in" pin mode | 
 | `name` | `string` | Initial display name for the PIN accessory - can be renamed in HomeKit app (e.g. Home) |
 | `pin` | `number` | The BCM pin number - see Pin Configuration below |
 | `enabled` | `true / false` | Whether you want the module to publish this pin as an accessory |
