@@ -190,7 +190,7 @@ WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
       .setCharacteristic(Characteristic.SerialNumber, platform.config.serial ? platform.config.serial : "Default-SerialNumber");
 
     switch(true) {
-      case (gpiopin.mode === "out") && (gpiopin.type === "Switch"):
+      case (gpiopin.mode === "out") :
         newAccessory.addService(Service.Switch, gpiopin.name);
         break;
       case (gpiopin.mode === "in") && (gpiopin.type === "MotionSensor"):
